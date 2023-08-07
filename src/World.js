@@ -65,31 +65,16 @@ export default class World {
   }
 
   async doDrop({ tags, message }) {
-    if (tags.emotes) {
-      const emoteIds = Object.keys(tags.emotes);
-      const emoteId = this.p5.random(emoteIds);
-      const imageUrl = `https://static-cdn.jtvnw.net/emoticons/v1/${emoteId}/2.0`;
-      const image = await this.imageManager.getImage(imageUrl);
-      this.queueDrop(image);
-    } else if (message.match(/\bme\b/)) {
-      const userId = tags['user-id'];
-      const user = await this.userManager.getUser(userId);
-      if (Date.now() - new Date(user.created_at) >= config.minAccountAge) {
-        // TODO: make sure this sizing doesn't break...
-        const imageUrl = user.logo.replace('300x300', '50x50');
-        const image = await this.imageManager.getImage(imageUrl);
-        const clip = await this.imageManager.getImage(clipImage);
-        image.mask(clip);
-        this.queueDrop(image);
-      }
-    }
+    console.log(tags['display-name']);
+    const image = await this.imageManager.getImage(clipImage);
+    this.queueDrop(image, tags['display-name']);
   }
 
-  queueDrop(image) {
+  queueDrop(image, name) {
     if (this.drops.length <= config.maxVisibleDrops) {
-      this.drops.push(new Drop(this.p5, image));
+      this.drops.push(new Drop(this.p5, image, name));
     } else {
-      this.dropQueue.push(new Drop(this.p5, image));
+      this.dropQueue.push(new Drop(this.p5, image, name));
     }
   }
 }

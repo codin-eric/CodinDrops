@@ -1,8 +1,16 @@
 # Seedling Drop v2 - Revenge of the newts!
 
+## Pre-requisites
+* You need to have npm
+* Run `npm install`
+
 ## Setup:
 
 * Copy `config.sample.js` to `config.js` and update accordingly.
+
+## Use:
+* start the server with `npm run dev`
+* use the command `!drop` in the chat
 
 ## TODO:
 

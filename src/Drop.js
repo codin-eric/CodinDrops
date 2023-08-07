@@ -6,9 +6,11 @@ export default class Drop {
    * @param {import('p5')} p5
    * @param {import('p5').Image} image
    */
-  constructor(p5, image) {
+  constructor(p5, image, name) {
     this.p5 = p5;
     this.image = image;
+    this.name = name;
+    this.textSize = 32;
     this.landed = false;
     this.wobble = p5.random(p5.TAU);
     this.position = p5.createVector(
@@ -38,6 +40,9 @@ export default class Drop {
     if (this.inGarden) {
       this.p5.tint(0, 255, 0);
     }
+    this.p5.stroke(1);
+    this.p5.textSize(this.textSize);
+    this.p5.text(this.name, 10, 32);
     this.p5.image(
       this.image,
       0, 0,
