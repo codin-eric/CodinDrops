@@ -2,8 +2,7 @@ import config from './config';
 import UserManager from './UserManager';
 import ImageManager from './ImageManager';
 import Drop from './Drop';
-import clipImage from './white_circle.png';
-import gardenImage from './grass-target.png';
+import clipImage from './white_circle.png';  // Drop image
 
 export default class World {
   /**
@@ -18,10 +17,6 @@ export default class World {
     this.imageManager = new ImageManager(p5);
 
     this.draw = this.draw.bind(this);
-    this.p5.loadImage(gardenImage, (image) => {
-      this.gardenImage = image;
-      this.gardenWidth = image.width / 1.25;
-    });
   }
 
   draw() {
@@ -32,28 +27,12 @@ export default class World {
     } else {
       p5.clear();
     }
-    if (this.gardenImage) {
-      this.p5.push();
-      this.p5.imageMode(p5.CENTER);
-      this.p5.image(
-        this.gardenImage,
-        p5.windowWidth / 2,
-        p5.windowHeight + 12,
-        this.gardenWidth,
-        this.gardenImage.height / 1.25,
-      );
-      this.p5.pop();
-    }
+
     const now = Date.now();
+
+    // update and draw drops
     drops = drops.filter((drop) => {
       drop.update();
-      if (drop.landed) {
-        const leftEdge = this.p5.windowWidth / 2 - this.gardenWidth / 2;
-        const rightEdge = this.p5.windowWidth / 2 + this.gardenWidth / 2;
-        if (drop.position.x >= leftEdge && drop.position.x <= rightEdge) {
-          drop.inGarden = true;
-        }
-      }
       return !drop.draw(now);
     });
     if (drops.length <= config.maxVisibleDrops) {
@@ -65,12 +44,18 @@ export default class World {
   }
 
   async doDrop({ tags, message }) {
-    console.log(tags['display-name']);
     const image = await this.imageManager.getImage(clipImage);
     this.queueDrop(image, tags['display-name']);
   }
 
   queueDrop(image, name) {
+    // iterate over drops and if the drop is already in the drops array re-queue it
+    this.drops.forEach((drop, index) => {
+      if (drop.name === name) {
+        this.drops.splice(index, 1);
+      }
+    });
+
     if (this.drops.length <= config.maxVisibleDrops) {
       this.drops.push(new Drop(this.p5, image, name));
     } else {

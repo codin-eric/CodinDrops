@@ -10,7 +10,7 @@ export default class Drop {
     this.p5 = p5;
     this.image = image;
     this.name = name;
-    this.textSize = 32;
+    this.textSize = 20;
     this.landed = false;
     this.wobble = p5.random(p5.TAU);
     this.position = p5.createVector(
@@ -24,39 +24,33 @@ export default class Drop {
   }
 
   draw(now) {
-    let alpha = 1;
     this.p5.push();
-    if (this.landed) {
-      const diff = now - this.landTime;
-      alpha = diff >= config.dropTimeout ? 0 : this.p5.map(diff, config.dropTimeout, 0, 0, 1);
-      this.p5.drawingContext.globalAlpha = alpha;
-    }
+
     // translate to the point we want to rotate around, which is the top center of the drop
     this.p5.translate(this.position.x, this.position.y - this.image.height / 2);
     // rotate by the drops wobble value mapped between -PI/16 and PI/16
     this.p5.rotate(this.p5.map(this.p5.sin(this.wobble), -1, 1, -this.p5.QUARTER_PI / 2, this.p5.QUARTER_PI / 2));
     // translate down from the rotate point to the draw point (center)
     this.p5.translate(0, this.image.height / 2);
-    if (this.inGarden) {
-      this.p5.tint(0, 255, 0);
-    }
-    this.p5.stroke(1);
-    this.p5.textSize(this.textSize);
-    this.p5.text(this.name, 10, 32);
-    this.p5.image(
-      this.image,
-      0, 0,
-    );
-    this.p5.pop();
+    this.p5.image(this.image, 0, 0,);
 
-    return alpha <= 0;
+    // Draw name
+    this.p5.fill(255);
+    this.p5.stroke(0);
+    this.p5.strokeWeight(2);
+    this.p5.textAlign(this.p5.CENTER);
+
+    this.p5.translate(0, - this.image.height + this.textSize/2);
+    this.p5.textSize(this.textSize);
+    this.p5.text(this.name, this.textSize, 32);
+    this.p5.pop();
   }
 
   update() {
     const {
       position, velocity, p5, image, landed,
     } = this;
-    if (landed) return;
+    
     position.add(velocity);
     if (position.x <= 0) {
       velocity.mult(-1, 1);
@@ -65,11 +59,16 @@ export default class Drop {
       position.x = p5.windowWidth - image.width;
     }
 
+    this.wobble += p5.random(0.05, 0.1);
+    if (landed){
+      velocity.mult(0.9999, 0);
+      this.wobble *= 0.9999;
+    };
+
     if (position.y + image.height >= p5.windowHeight) {
       position.y = p5.windowHeight - image.height;
       this.landed = true;
       this.landTime = Date.now();
     }
-    this.wobble += p5.random(0.05, 0.1);
   }
 }
